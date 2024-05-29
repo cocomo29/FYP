@@ -80,11 +80,16 @@ def get_system_info():
 
 sio = socketio.Client()
 
-def send_system_info():
-    while True:
-        data = get_system_info()
-        sio.emit('system_info', json.dumps(data))
-        sio.sleep(1)
+@sio.event
+def connect():
+    public_ip = get_public_ip()
+    if public_ip:
+        sio.emit('agent_details', json.dumps({'public_ip': public_ip, 'agent_name': agent_name}))
+
+@sio.event
+def get_system_info():
+    data = get_system_info()
+    sio.emit('system_info_response', json.dumps(data))
 
 @sio.event
 def command(data):
@@ -195,12 +200,6 @@ def restart_service(service_name):
         print(e.output.decode('utf-8').strip())
         sio.emit('restart_service_result', json.dumps({'error': e.output.decode('utf-8').strip()}))
 
-@sio.event
-def connect():
-    public_ip = get_public_ip()
-    if public_ip:
-        sio.emit('agent_details', json.dumps({'public_ip': public_ip, 'agent_name': agent_name}))
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='SocketIO Client')
     parser.add_argument('master_ip', type=str, help='Master IP address')
@@ -211,6 +210,4 @@ if __name__ == '__main__':
     agent_name = args.agent_name
 
     sio.connect(f'http://{master_ip}:5000')
-    threading.Thread(target=send_system_info).start()
-
     sio.wait()
