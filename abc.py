@@ -27,7 +27,7 @@ def get_size(bytes, suffix="B"):
             return f"{bytes:.2f}{unit}{suffix}"
         bytes /= factor
 
-def get_system_info():
+def collect_system_info():
     """Collects detailed system, CPU, and memory information into a dictionary."""
     system_info = {}
 
@@ -87,8 +87,8 @@ def connect():
         sio.emit('agent_details', json.dumps({'public_ip': public_ip, 'agent_name': agent_name}))
 
 @sio.event
-def get_system_info():
-    data = get_system_info()
+def handle_get_system_info():
+    data = collect_system_info()
     sio.emit('system_info_response', json.dumps(data))
 
 @sio.event
