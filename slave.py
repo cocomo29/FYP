@@ -5,7 +5,7 @@ import threading
 import psutil
 import platform
 from datetime import datetime
-import pyufw as ufw
+#import pyufw as ufw
 import argparse
 import requests
 
